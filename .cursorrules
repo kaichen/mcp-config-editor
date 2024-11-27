@@ -1,2 +1,4 @@
 this is a desktop app, powered by tauri, react, typescript and vite.
 use bun as package manager.
+use tailwind css with shadcn/ui for styling.
+write git commit message in english, and keep it one line.
