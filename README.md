@@ -1,7 +1,14 @@
-# Tauri + React + Typescript
+# MCP Manager
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A simple GUI for managing MCP servers.
 
-## Recommended IDE Setup
+**Note:** This is a work in progress, only tested on MacOS.
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Todos
+- [ ] enable restart claude desktop
+- [ ] check runtime environment
+- [ ] testing on windows
+
+## License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

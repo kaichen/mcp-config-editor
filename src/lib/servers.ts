@@ -32,7 +32,7 @@ export const MCP_SERVERS: Record<string, McpServer> = {
     args: ["-y", "@modelcontextprotocol/server-gitlab"],
     env: {
       GITLAB_PERSONAL_ACCESS_TOKEN: "<YOUR_TOKEN>",
-      GITLAB_API_URL: "https://gitlab.com/api/v4"
+      GITLAB_API_URL: "${default:https://gitlab.com/api/v4}"
     }
   },
   "google-maps": {
@@ -70,4 +70,4 @@ export const MCP_SERVERS: Record<string, McpServer> = {
     command: "uv",
     args: ["--directory", "${dir:parent_of_servers_repo/servers/src/sqlite}", "run", "mcp-server-sqlite", "--db-path", "${path:~/test.db}"]
   }
-}; 
+};
