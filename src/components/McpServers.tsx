@@ -3,65 +3,24 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import { Config, readConfig, writeConfig } from '../lib/config';
-
-const AVAILABLE_SERVERS = {
-  memory: {
-    name: '内存服务器',
-    description: '临时存储数据，重启后清除',
-    config: {
-      command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-memory']
-    }
-  },
-  filesystem: {
-    name: '文件系统服务器',
-    description: '从本地文件系统读取数据',
-    needsPath: true,
-    config: (path: string) => ({
-      command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-filesystem', path]
-    })
-  },
-  git: {
-    name: 'Git 服务器',
-    description: '从 Git 仓库读取数据',
-    needsPath: true,
-    config: (path: string) => ({
-      command: 'uvx',
-      args: ['mcp-server-git', '--repository', path]
-    })
-  },
-  github: {
-    name: 'Github 服务器',
-    description: '从 Github 仓库读取数据',
-    needsToken: true,
-    config: (token: string) => ({
-      command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-github'],
-      env: {
-        GITHUB_PERSONAL_ACCESS_TOKEN: token
-      }
-    })
-  }
-} as const;
+import type { Config, McpServer } from '../lib/config';
+import { readConfig, writeConfig, hasPathVariable, replacePathVariable } from '../lib/config';
+import { MCP_SERVERS } from '../lib/servers';
 
 export function McpServers() {
   const [config, setConfig] = useState<Config>();
-  const [githubToken, setGithubToken] = useState('');
+  const [tokens, setTokens] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadConfig();
-  }, [config]);
+  }, []);
 
   async function loadConfig() {
-    console.log('🐟cfg', config);
     const cfg = await readConfig();
-    console.log('🐟cfg', cfg);
     setConfig(cfg);
   }
 
-  async function handleToggleServer(serverType: keyof typeof AVAILABLE_SERVERS) {
+  async function handleToggleServer(serverType: string) {
     if (!config) return;
 
     const newConfig = { ...config };
@@ -69,21 +28,28 @@ export function McpServers() {
     if (newConfig.mcpServers[serverType]) {
       delete newConfig.mcpServers[serverType];
     } else {
-      const serverDef = AVAILABLE_SERVERS[serverType];
+      const serverDef = MCP_SERVERS[serverType];
       
-      if ('needsPath' in serverDef && serverDef.needsPath) {
+      if (hasPathVariable(serverDef)) {
         const path = await open({
           directory: true,
           multiple: false,
         });
         if (!path) return;
-        newConfig.mcpServers[serverType] = serverDef.config(path as string);
-      } else if ('needsToken' in serverDef && serverDef.needsToken) {
-        if (!githubToken) return;
-        newConfig.mcpServers[serverType] = serverDef.config(githubToken);
-        setGithubToken('');
+        newConfig.mcpServers[serverType] = replacePathVariable(serverDef, path as string);
+      } else if (serverDef.env && Object.keys(serverDef.env).some(key => serverDef.env![key].includes('<YOUR_TOKEN>'))) {
+        const token = tokens[serverType];
+        if (!token) return;
+        newConfig.mcpServers[serverType] = {
+          ...serverDef,
+          env: {
+            ...serverDef.env,
+            [Object.keys(serverDef.env).find(key => serverDef.env![key].includes('<YOUR_TOKEN>'))!]: token
+          }
+        };
+        setTokens(prev => ({ ...prev, [serverType]: '' }));
       } else {
-        newConfig.mcpServers[serverType] = serverDef.config;
+        newConfig.mcpServers[serverType] = serverDef;
       }
     }
     
@@ -100,13 +66,18 @@ export function McpServers() {
         <CardDescription>管理 Model Context Protocol 服务器</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {Object.entries(AVAILABLE_SERVERS).map(([type, server]) => {
+        {Object.entries(MCP_SERVERS).map(([type, server]) => {
           const isEnabled = type in config.mcpServers;
+          const needsToken = server.env && Object.values(server.env).some(v => v.includes('<YOUR_TOKEN>'));
+          const needsPath = hasPathVariable(server);
+          
           return (
             <div key={type} className="flex items-center justify-between space-x-4 rounded-lg border p-4">
               <div className="space-y-1">
-                <h4 className="text-sm font-medium">{server.name}</h4>
-                <p className="text-sm text-gray-500">{server.description}</p>
+                <h4 className="text-sm font-medium">{type}</h4>
+                <p className="text-sm text-gray-500">
+                  {needsPath ? '需要选择路径' : needsToken ? '需要 Token' : '无需配置'}
+                </p>
                 {isEnabled && (
                   <p className="text-xs text-gray-500">
                     {config.mcpServers[type].command} {config.mcpServers[type].args.join(' ')}
@@ -114,18 +85,18 @@ export function McpServers() {
                 )}
               </div>
               <div className="flex items-center space-x-2">
-                {'needsToken' in server && server.needsToken && !isEnabled && (
+                {needsToken && !isEnabled && (
                   <Input
                     className="w-48"
-                    placeholder="Github Token"
+                    placeholder="输入 Token"
                     type="password"
-                    value={githubToken}
-                    onChange={(e) => setGithubToken(e.target.value)}
+                    value={tokens[type] || ''}
+                    onChange={(e) => setTokens(prev => ({ ...prev, [type]: e.target.value }))}
                   />
                 )}
                 <Switch
                   checked={isEnabled}
-                  onCheckedChange={() => handleToggleServer(type as keyof typeof AVAILABLE_SERVERS)}
+                  onCheckedChange={() => handleToggleServer(type)}
                 />
               </div>
             </div>

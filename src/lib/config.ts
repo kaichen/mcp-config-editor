@@ -15,6 +15,32 @@ const defaultConfig: Config = {
   mcpServers: {}
 };
 
+export function hasPathVariable(server: McpServer): boolean {
+  return server.args.some(arg => arg.includes('${path:') || arg.includes('${dir:'));
+}
+
+export function extractPathVariables(server: McpServer): string[] {
+  return server.args
+    .filter(arg => arg.includes('${path:') || arg.includes('${dir:'))
+    .map(arg => {
+      const pathMatch = arg.match(/\$\{path:([^}]+)\}/);
+      const dirMatch = arg.match(/\$\{dir:([^}]+)\}/);
+      return (pathMatch || dirMatch) ? (pathMatch?.[1] || dirMatch?.[1]) : '';
+    })
+    .filter(Boolean);
+}
+
+export function replacePathVariable(server: McpServer, path: string): McpServer {
+  const newServer = { ...server };
+  newServer.args = server.args.map(arg => {
+    if (arg.includes('${path:') || arg.includes('${dir:')) {
+      return path;
+    }
+    return arg;
+  });
+  return newServer;
+}
+
 export async function getConfigPath() {
   return await join(
     await localDataDir(),
