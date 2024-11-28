@@ -3,7 +3,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import type { Config, McpServer } from '../lib/config';
+import type { Config } from '../lib/config';
 import { 
   readConfig, 
   writeConfig, 
@@ -17,8 +17,10 @@ import {
   getEnvDefaults
 } from '../lib/config';
 import { MCP_SERVERS } from '../lib/servers';
+import { useTranslation } from 'react-i18next';
 
 export function McpServers() {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<Config>();
   const [envInputs, setEnvInputs] = useState<Record<string, Record<string, string>>>({});
   const [texts, setTexts] = useState<Record<string, string>>({});
@@ -79,8 +81,8 @@ export function McpServers() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>MCP Servers</CardTitle>
-        <CardDescription>管理 Model Context Protocol 服务器</CardDescription>
+        <CardTitle>{t('mcp.title')}</CardTitle>
+        <CardDescription>{t('mcp.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {Object.entries(MCP_SERVERS).map(([type, server]) => {
@@ -95,7 +97,10 @@ export function McpServers() {
               <div className="space-y-1">
                 <h4 className="text-sm font-medium">{type}</h4>
                 <p className="text-sm text-gray-500">
-                  {needsPath ? '需要选择路径' : needsText ? '需要输入文本' : envFields.length > 0 ? '需要配置环境变量' : '无需配置'}
+                  {needsPath ? t('common.needsPath') : 
+                   needsText ? t('common.needsText') : 
+                   envFields.length > 0 ? t('common.needsEnv') : 
+                   t('common.noConfig')}
                 </p>
                 {isEnabled && (
                   <p className="text-xs text-gray-500">
@@ -125,7 +130,7 @@ export function McpServers() {
                 {needsText && !isEnabled && (
                   <Input
                     className="w-48"
-                    placeholder="输入配置文本"
+                    placeholder={t('common.inputText')}
                     value={texts[type] || ''}
                     onChange={(e) => setTexts(prev => ({ ...prev, [type]: e.target.value }))}
                   />

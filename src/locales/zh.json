@@ -1,0 +1,17 @@
+{
+  "common": {
+    "needsPath": "需要选择路径",
+    "needsText": "需要输入文本",
+    "needsEnv": "需要配置环境变量",
+    "noConfig": "无需配置",
+    "inputText": "输入配置文本"
+  },
+  "language": {
+    "en": "English",
+    "zh": "中文"
+  },
+  "mcp": {
+    "title": "MCP 服务器",
+    "description": "管理 Model Context Protocol 服务器"
+  }
+} 

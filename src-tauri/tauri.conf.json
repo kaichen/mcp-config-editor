@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "mcp-config-editor",
+        "title": "MCP Config Editor",
         "width": 800,
         "height": 600
       }

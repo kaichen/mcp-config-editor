@@ -1,0 +1,17 @@
+{
+  "common": {
+    "needsPath": "Path selection required",
+    "needsText": "Text input required",
+    "needsEnv": "Environment variables required",
+    "noConfig": "No configuration needed",
+    "inputText": "Enter configuration text"
+  },
+  "language": {
+    "en": "English",
+    "zh": "中文"
+  },
+  "mcp": {
+    "title": "MCP Servers",
+    "description": "Manage Model Context Protocol Servers"
+  }
+} 

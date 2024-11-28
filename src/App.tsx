@@ -1,9 +1,13 @@
 import { McpServers } from './components/McpServers';
+import { LanguageSwitch } from './components/LanguageSwitch';
 
-export default function App() {
+function App() {
   return (
-    <main className="container mx-auto p-4">
+    <div className="container mx-auto py-8">
+      <LanguageSwitch />
       <McpServers />
-    </main>
+    </div>
   );
 }
+
+export default App;

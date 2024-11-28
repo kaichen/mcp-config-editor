@@ -8,6 +8,7 @@ A simple GUI for managing MCP servers.
 - [ ] enable restart claude desktop
 - [ ] check runtime environment
 - [ ] testing on windows
+- [ ] persist config key
 
 ## License
 
